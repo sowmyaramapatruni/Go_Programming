@@ -1,0 +1,17 @@
+Write a GoLang multithreaded applications to compute the sum of integers stored in a file. Your program will take two command-line input parameters: M and fname. Here M is an integer and fname is the pathname (relative or absolute) to the input data file.
+The format of the input data file is: a sequence of integers separated by white space, written in ASCII decimal text notation; you may assume that each integer is the ASCII representation of a 64-bit signed integer (and has ~20 digits).
+Your program should spawn M workers threads and one coordinator thread. The main() of your program simply spawns the coordinator.
+The workers and the coordinator are to be implemented as goroutines in the GoLang. Workers can communicate with the coordinator but do not communicate among themselves. Use GoLang channels for communication between the workers and the coordinators.
+The coordinator partitions the data file in M equal-size contiguous fragments; each kth fragment will be given to the kth worker via a JSON message of the form that includes the datafile's filename and the start and end byte position of the kth fragment, eg "{datafile: fname, start: pos1 , end: pos2}"
+Each worker upon receiving its assignment via a JSON message it computes a partial sum which is the sum of all the integers which are fully contained within its assigned fragment. It also identifies a prefix or suffix of its fragment that could be part of integers split between adjacent (neighboring) fragments. Upon completion, the worker communicates its response to the coordinator via a JSON message with the partial sum, suffix, and prefix of its fragment, eg: "{value: ddd, prefix: '1224 ', suffix: ' 678'}".
+The coordinator, upon receving a response from each worker, accumulates all the workers's partial sums, as well as the sums of the couple of integers in the concatenation of kth suffix and (k+1)th prefix (received by the the workers assigned the kth and (k+1)th fragments respectively.
+
+Your implementation should be correct and efficient by ensuring that
+the coordinator, upon completion, computes the correct sum of the integers in the datafile.
+there are no race conditions.
+has least amount of information (#bytes) communicated between the coordinator and the workers.
+least synchronization delay (elapsed time of syncrhonization between workers and coordinator).
+has least latency time for the coordinator (time difference between the last response received and the coordinator finishing).
+has least response time for the coordinator (time difference between the coordinator starting and the receiving its 1st response from a worker).
+has least elapsed time for the "slowest" worker (the time from when a worker starts and when it finishes).
+has least elapsed time for the coordinator (the time from when the coordinator starts and finishes).
